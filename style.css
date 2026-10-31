@@ -1,0 +1,359 @@
+/* HelloClaude: charcoal with a ruby accent, always dark (the phone's light mode doesn't change it). The plan
+   page's layout (library/templates/plan.html), set for a phone with tabs along the bottom.
+   --accent fills (selected day, buttons, bars, stars, step numbers); --accent-ink is the lighter ruby for small
+   text on charcoal; the Chef's changes stay blue; a nutrient met is green (--good), below or over a limit is red (--bad); stars are gold. */
+:root {
+  --bg: #141414; --paper: #1d1d1d; --ink: #ededed; --muted: #9a9a9a; --line: #2e2e2e;
+  --accent: #d7263d; --accent-soft: #311015; --accent-ink: #ff7a8c; --on-accent: #ffffff;
+  --heather: #ff7a8c; --chef: #8ab4ff; --chef-soft: #1c2a44;
+  --star: #f2c14e; --good: #5fd07a; --good-soft: #183020; --bad: #ff5c5c; --bad-soft: #3a1a1a;
+  --p: #3987e5; --c: #e8742a; --f: #1baf7a; --track: #2e2e2e;
+  --display: "Young Serif", Georgia, serif;
+  --body: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --bar: 64px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+html { -webkit-text-size-adjust: 100% }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body);
+  padding-bottom: calc(var(--bar) + 24px + max(8px, env(safe-area-inset-bottom, 0px))) }
+img { max-width: 100% }
+[hidden] { display: none !important }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1 { font: 400 clamp(24px, 6vw, 38px)/1.1 var(--display); margin: 2px 0 6px; text-wrap: balance }
+h2 { font: 400 clamp(22px, 4.5vw, 30px)/1.15 var(--display); margin: 0; text-wrap: balance }
+h3 { font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px }
+.eyebrow { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+.lede { color: var(--muted); max-width: 68ch; margin: 0 }
+a { color: var(--accent-ink) }
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid var(--heather); outline-offset: 2px }
+.stack { display: grid; gap: 20px }
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 16px; min-width: 0 }
+.num { font-variant-numeric: tabular-nums }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between }
+.err { color: var(--bad) }
+.foot { font-size: 12.5px; color: var(--muted); margin: 10px 0 0 }
+
+/* top of each view */
+.head { padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: 4px; display: flex; gap: 12px; align-items: flex-start; justify-content: space-between }
+.icon-btn { flex: none; width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); display: grid; place-items: center; cursor: pointer; padding: 0 }
+.icon-btn svg { width: 20px; height: 20px }
+.sync { font: 500 11.5px var(--mono); color: var(--muted); margin: 0 0 6px }
+.sync.warn { color: var(--heather) }
+
+/* bottom bar: five tabs, Weekly pick in the centre. Full screen on Android draws the bar over the gesture strip,
+   so it keeps at least 8px under the labels when the phone reports no safe area */
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--paper); border-top: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: calc(var(--bar) + max(8px, env(safe-area-inset-bottom, 0px))); padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) }
+.tabbar button { border: 0; background: none; color: var(--muted); font: 600 11px/1.2 var(--body); padding: 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.01em; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; -webkit-tap-highlight-color: transparent }
+.tabbar svg { width: 24px; height: 24px }
+.tabbar button[aria-selected="true"] { color: var(--accent-ink) }
+.tabbar button[aria-selected="true"] .pip { background: var(--accent-soft) }
+.tabbar .pip { padding: 3px 12px; border-radius: 999px; display: grid; place-items: center }
+
+/* a line under Weekly pick and Shopping (tabs 3 and 4): one week, planned and shopped together */
+.unite { position: absolute; left: calc(40% + 10px); width: calc(40% - 20px); bottom: calc(5px + max(8px, env(safe-area-inset-bottom, 0px))); height: 3px; border-radius: 2px; background: var(--accent); opacity: .55; pointer-events: none }
+
+/* sub-tabs along the top of Train and Repertoire */
+.chipnav.subtabs { position: sticky; top: 0; z-index: 4; background: var(--bg); margin: 0 -16px; padding: 10px 16px; border-bottom: 1px solid var(--line); scroll-padding-inline: 16px }
+.subpane { padding-top: 12px }
+.chipnav.minor button { font-size: 12.5px; padding: 5px 10px }
+.chipnav.minor button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink) }
+.syncbar { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 8px }
+.syncbar .sync { margin: 0 }
+.syncbar .btn { padding: 6px 14px; font-size: 13px }
+
+/* Setup: Markdown pages and controls */
+.doc { font-size: 14.5px }
+.doc h2 { font-size: 24px; margin: 18px 0 6px } .doc h3 { margin: 18px 0 6px } .doc h4 { font: 600 14px var(--body); margin: 14px 0 4px }
+.doc p { margin: 0 0 10px; max-width: 68ch } .doc ul, .doc ol { margin: 0 0 10px; padding-left: 20px } .doc li { margin: 2px 0 }
+.doc code { font: 500 12.5px var(--mono); background: var(--paper); padding: 1px 4px; border-radius: 4px }
+.doc table, table.tgt { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 0 0 12px }
+.doc th, .doc td, table.tgt td, table.tgt th { text-align: left; padding: 5px 8px 5px 0; border-bottom: 1px solid var(--line); vertical-align: top }
+table.tgt th { font: 600 11.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-top: 12px }
+table.tgt td + td { text-align: right; font: 500 12.5px var(--mono) }
+.setrow { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 14px }
+.stepper { display: flex; gap: 10px; align-items: center } .stepper b { font: 400 22px var(--display); min-width: 22px; text-align: center }
+.stepper .btn { width: 40px; height: 40px; padding: 0; font-size: 20px }
+
+/* Discover: one card at a time, dragged or tapped left (skip) and right (keep) */
+.deck { position: relative }
+.dcard { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; touch-action: pan-y; user-select: none; --keep: 0; --skip: 0 }
+.dph { position: relative; aspect-ratio: 4 / 3; background: var(--accent-soft) }
+.dph img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none }
+.stamp { position: absolute; top: 16px; font: 600 20px var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 4px 12px; border: 3px solid; border-radius: 8px; background: rgba(0, 0, 0, .35) }
+.stamp.keep { left: 16px; color: var(--good); opacity: var(--keep); transform: rotate(-10deg) }
+.stamp.skip { right: 16px; color: var(--bad); opacity: var(--skip); transform: rotate(10deg) }
+.dbody { padding: 14px 16px 16px; display: grid; gap: 6px }
+.dbody h2 { font-size: 22px } .dbody p { margin: 2px 0 0; font-size: 14.5px }
+.dbody .mt { font: 500 12px var(--mono); color: var(--muted) }
+.dbtns { display: flex; align-items: center; justify-content: center; gap: 28px; margin-top: 14px }
+.dbtn { width: 64px; height: 64px; border-radius: 999px; border: 2px solid var(--line); background: var(--paper); font-size: 26px; cursor: pointer; display: grid; place-items: center }
+.dbtn.keep { color: var(--good); border-color: var(--good) } .dbtn.skip { color: var(--bad); border-color: var(--bad) }
+.dbtn:disabled { opacity: .35 }
+
+/* Engine */
+.engine { display: grid; gap: 0 }
+.estep { border-left: 4px solid var(--line) } .estep p { margin: 4px 0 0; font-size: 14px; color: var(--muted) }
+.estep b { font: 400 18px var(--display) } .estep .who { font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .05em }
+.estep.ai { border-left-color: var(--chef) } .estep.ai .who { color: var(--chef) }
+.estep.you { border-left-color: var(--accent) } .estep.you .who { color: var(--accent-ink) }
+.estep.script { border-left-color: var(--good) } .estep.script .who { color: var(--good) }
+.engine .arrow { text-align: center; color: var(--muted); font-size: 18px; line-height: 1.6 }
+.loops { margin: 0; padding-left: 18px; font-size: 14px }
+
+/* choices */
+.wrapchips { flex-wrap: wrap; overflow: visible }
+.why { font-size: 12.5px; color: var(--accent-ink) }
+
+/* re-picking a week: three menus, each dinner can be rerolled */
+.pickcards { display: grid; gap: 12px }
+.pickcard { border: 1px solid var(--line); border-radius: 8px; background: var(--paper); padding: 12px 14px; display: grid; gap: 8px }
+.pickcard[aria-current="true"] { border: 2px solid var(--accent); background: var(--accent-soft) }
+.pickcard .choose { justify-self: start }
+.prow { display: grid; grid-template-columns: 38px 1fr auto; gap: 8px; align-items: center; border-top: 1px solid var(--line); padding-top: 8px }
+.prow .d { font: 600 12px var(--mono); text-transform: uppercase; color: var(--muted) }
+.prow .nmb { background: none; border: 0; padding: 0; text-align: left; color: var(--ink); font: 400 15px/1.3 var(--display); cursor: pointer }
+.prow .sw { font: 500 11px var(--mono); color: var(--heather); display: block }
+.reroll { width: 36px; height: 36px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); display: grid; place-items: center; cursor: pointer; padding: 0 }
+.reroll svg { width: 18px; height: 18px }
+.notice { padding: 10px 12px; border-radius: 6px; background: var(--chef-soft); font-size: 14px }
+
+/* rebuilding after a pick: a spinner, a bar and the time left */
+.rbslot { flex: none; padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px)) }
+.rbslot:empty { display: none }
+.rebuild { display: flex; gap: 14px; align-items: center; margin: 10px 0 2px; padding: 10px 14px; border-radius: 8px; background: var(--accent-soft); font-size: 14.5px }
+.rebuild .rbtext { flex: 1; min-width: 0 }
+.rebuild .mono { font: 500 12px var(--mono); color: var(--muted) }
+.spin { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: spin .8s linear infinite }
+@keyframes spin { to { transform: rotate(360deg) } }
+.pbar { height: 6px; margin-top: 8px; border-radius: 3px; background: var(--track); overflow: hidden }
+.pbar i { display: block; height: 100%; width: 3%; border-radius: 3px; background: var(--accent); transition: width 1s linear }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 3s } .pbar i { transition: none } }
+
+/* library */
+.search { width: 100%; font: 16px var(--body); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px; margin: 10px 0 0 }
+.chipnav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 10px 0 }
+.chipnav::-webkit-scrollbar { display: none }
+.chipnav button { flex: none; font: 600 13px var(--body); border: 1px solid var(--line); background: var(--paper); color: var(--ink); padding: 6px 12px; border-radius: 999px; cursor: pointer }
+.chipnav button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent) }
+.librows { list-style: none; margin: 0 0 24px; padding: 0 }
+.librows li > button { width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 11px 0; color: var(--ink); font: inherit; cursor: pointer; display: grid; gap: 2px }
+.librows .nm { font: 400 17px/1.25 var(--display) }
+.librows .mt { font: 500 12px var(--mono); color: var(--muted) }
+.librows .grp { font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); padding: 16px 0 4px; border-bottom: 1px solid var(--line) }
+.libhero { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 6px; background: var(--accent-soft); display: block }
+
+/* recipes: day pills over a pager, one page per day, swiped left and right; each page scrolls on its own */
+/* pinned between the top of the screen and the tab bar: full screen on Android can over-report the screen height */
+#view-recipes { display: flex; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: calc(var(--bar) + max(8px, env(safe-area-inset-bottom, 0px))) }
+#view-recipes[hidden] { display: none }
+.days { flex: none; z-index: 5; background: var(--bg); display: flex; gap: 6px; padding-block: calc(4px + env(safe-area-inset-top, 0px)) 10px;
+  padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px)); border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none }
+.days::-webkit-scrollbar { display: none }
+.days a { flex: none; font: 600 14px var(--body); border: 1px solid var(--line); background: var(--paper); color: var(--ink); padding: 7px 14px; border-radius: 999px; text-decoration: none }
+.days a[aria-current="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent) }
+.pager { position: relative; flex: 1; min-height: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none }
+.pager::-webkit-scrollbar { display: none }
+.page { flex: 0 0 100%; width: 100%; overflow-y: auto; overscroll-behavior-y: contain; scroll-snap-align: start; scroll-snap-stop: always;
+  padding: 18px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)) }
+.page > .inner { max-width: 1180px; margin: 0 auto }
+.day-title { display: flex; align-items: baseline; gap: 10px; margin: 0 0 14px }
+.day-title h2 { font-size: clamp(26px, 6vw, 34px) }
+
+/* stars */
+.stars { font-size: 15px; letter-spacing: 1px; color: var(--star); white-space: nowrap }
+.stars .off { color: var(--line) }
+.stars small { font: 500 11.5px var(--mono); color: var(--muted); letter-spacing: 0; margin-left: 6px }
+
+/* overview dinner cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; min-width: 0 }
+.ph { position: relative; aspect-ratio: 4 / 3; background: var(--accent-soft) }
+.ph img { width: 100%; height: 100%; object-fit: cover; display: block }
+.badge { position: absolute; left: 10px; top: 10px; font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .05em; padding: 3px 8px; border-radius: 999px; background: var(--paper); color: var(--ink) }
+.cb { padding: 14px; display: grid; gap: 10px }
+.cb h4 { font: 400 18px/1.25 var(--display); margin: 0; text-wrap: balance }
+.cb h4 a { color: var(--ink); text-decoration: none }
+.stat { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 500 12.5px var(--mono); color: var(--muted) }
+.stat b { color: var(--ink); font-weight: 500 }
+.macro { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: center }
+.legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font-size: 13px }
+.legend li { display: flex; align-items: center; gap: 6px }
+.legend i { width: 10px; height: 10px; border-radius: 2px; flex: none }
+.legend .v { margin-left: auto; font: 500 12.5px var(--mono) }
+.chips { display: flex; flex-wrap: wrap; gap: 5px }
+.chip { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink) }
+.chip b { font-weight: 600 }
+details.ing summary { cursor: pointer; color: var(--accent-ink); font-weight: 600; font-size: 13.5px }
+.qty { list-style: none; margin: 6px 0 0; padding: 0; font-size: 13.5px }
+.qty li { padding: 3px 0; border-bottom: 1px solid var(--line) }
+
+/* a day: the day's breakdown, then the cook */
+.daysum { display: grid; gap: 12px }
+.meals { border-top: 1px solid var(--line) }
+.meals section { padding: 8px 0; border-bottom: 1px solid var(--line) }
+.meals .mname { font-size: 13px; color: var(--muted); text-align: right }
+.mitems { list-style: none; margin: 4px 0 0; padding: 0 }
+.mitems li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 2px 0; font-size: 14px; line-height: 1.4 }
+.mitems .g { font: 500 12.5px var(--mono); color: var(--muted); white-space: nowrap }
+.cook { display: grid; gap: 14px }
+.cookhead { display: grid; grid-template-columns: 88px 1fr; gap: 12px; align-items: center }
+.cookhead img { width: 88px; height: 88px; object-fit: cover; border-radius: 6px; background: var(--accent-soft); display: block }
+.dname { font: 400 19px/1.2 var(--display); color: var(--ink); letter-spacing: 0; text-transform: none; margin: 2px 0 4px }
+.dish { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; min-width: 0 }
+.dish .hero { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: var(--accent-soft) }
+.dish .db { padding: 16px; display: grid; gap: 10px }
+.sub { color: var(--heather); margin: 0; font-weight: 500 }
+.strip { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 6px; overflow: hidden }
+.strip div { padding: 8px 10px; border-right: 1px solid var(--line) }
+.strip div:last-child { border-right: 0 }
+.strip span { display: block; font: 500 10.5px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
+.strip b { font: 400 18px var(--display) }
+@media (max-width: 420px) { .strip { grid-template-columns: repeat(2, 1fr) } .strip div:nth-child(2) { border-right: 0 } .strip div:nth-child(-n+2) { border-bottom: 1px solid var(--line) } }
+.verdict { margin: 0; padding: 10px 12px; background: var(--chef-soft); border-radius: 6px; font-size: 14px }
+.verdict b { color: var(--chef) }
+.free { padding: 28px 16px; text-align: center }
+.wo { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 14px; min-width: 0 }
+.wo h4 { font: 400 18px var(--display); margin: 0 0 8px }
+.wo table { width: 100%; border-collapse: collapse; font-size: 13.5px }
+.wo td { padding: 5px 0; border-bottom: 1px solid var(--line); vertical-align: top }
+.wo td + td { text-align: right; font: 500 12.5px var(--mono); white-space: nowrap; padding-left: 8px; color: var(--muted) }
+.wo .note { font-size: 13px; color: var(--muted); margin: 0 0 8px }
+.fact { display: flex; gap: 10px; align-items: baseline; font-size: 13.5px; color: var(--muted); padding: 8px 12px; border: 1px dashed var(--line); border-radius: 6px; margin: 0 }
+.fact b { font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--heather); flex: none }
+
+/* recipe deep dive */
+.dive { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px; align-items: start }
+@media (max-width: 860px) { .dive { grid-template-columns: 1fr } }
+.src { font-size: 13px; color: var(--muted); margin: 0 0 10px }
+.key { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); margin: 0 0 12px }
+.ings { list-style: none; padding: 0; margin: 0 }
+.ings li { border-bottom: 1px solid var(--line) }
+.ings details summary { list-style: none; display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 6px 0; cursor: pointer; font-size: 14px }
+.ings details summary::-webkit-details-marker { display: none }
+.ings .k { font: 500 12px var(--mono); color: var(--muted); white-space: nowrap }
+.ings .more { font-size: 12.5px; color: var(--muted); padding: 0 0 8px; display: grid; gap: 4px }
+.ings .cutrow { padding: 6px 0; font-size: 14px }
+.new, ins { color: var(--chef); font-style: italic; text-decoration: none }
+.new::before { content: "+ "; font-style: normal; font-weight: 600 }
+del { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--muted) }
+.steps { list-style: none; padding: 0; margin: 0; counter-reset: s; display: grid; gap: 12px }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: 10px; font-size: 14.5px; line-height: 1.55 }
+.steps li::before { content: counter(s); font: 400 20px/1.2 var(--display); color: var(--ink) }
+.steps .was { display: block; font-size: 13px; margin-top: 2px }
+.chefbox { padding: 12px 14px; border-radius: 6px; background: var(--chef-soft); font-size: 14px }
+.chefbox b { color: var(--chef) }
+.larder { padding: 12px 14px; border-radius: 6px; background: var(--accent-soft); font-size: 14px }
+.larder b { color: var(--accent-ink) }
+.thirds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px }
+@media (max-width: 860px) { .thirds { grid-template-columns: 1fr } }
+.meal h4 { font: 400 17px var(--display); margin: 2px 0 8px }
+
+/* nutrient table */
+.ntable { font-size: 14px }
+.ntable .ngrp { margin: 14px 0 2px }
+.nrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "nm amt" "bar pill"; gap: 4px 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line) }
+.nrow .nm { grid-area: nm; min-width: 0 }
+.nrow .amt { grid-area: amt; text-align: right; font: 500 12.5px var(--mono); color: var(--muted); white-space: nowrap }
+.nrow .bar { grid-area: bar; min-width: 0 }
+.nrow .pill { grid-area: pill; min-width: 0; white-space: nowrap }
+.bar { position: relative; height: 10px; background: var(--track); border-radius: 0 4px 4px 0; min-width: 40px }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 4px 4px 0 }
+.bar .mark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); left: 50% }
+.pill { font: 500 11.5px var(--mono); padding: 2px 8px; border-radius: 999px; display: inline-block; min-width: 92px; text-align: center }
+.pill.ok, .chip.ok { background: var(--good-soft); color: var(--good) }
+.pill.bad, .chip.bad { background: var(--bad-soft); color: var(--bad) }
+.bar i.ok { background: var(--good) } .bar i.bad { background: var(--bad) }
+.scroll { overflow-x: auto }
+details.nut > summary { cursor: pointer; list-style: none }
+details.nut > summary::-webkit-details-marker { display: none }
+details.nut > summary h3::after { content: " +"; color: var(--accent-ink) }
+details.nut[open] > summary h3::after { content: " −" }
+
+/* buttons */
+.btn { white-space: nowrap; font: 600 14px var(--body); padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; text-decoration: none; display: inline-flex; gap: 6px; align-items: center; justify-content: center }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent) }
+.btn.big { width: 100%; padding: 13px 16px; font-size: 16px }
+.btn:disabled { opacity: .55 }
+
+/* rating */
+.rate { display: grid; gap: 10px }
+.rate .starbtns { display: flex; gap: 4px }
+.rate .starbtns button { border: 0; background: none; font-size: 30px; line-height: 1; padding: 2px; color: var(--line); cursor: pointer }
+.rate .starbtns button.on { color: var(--star) }
+.rate textarea, .field input, .field textarea { width: 100%; font: 15px var(--body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px }
+.rate textarea { min-height: 60px; resize: vertical }
+.saved { font: 500 12px var(--mono); color: var(--good) }
+
+/* picks card */
+.picks { border: 2px solid var(--accent); background: var(--paper); border-radius: 8px; padding: 14px; display: grid; gap: 12px; margin-top: 18px }
+.menus { display: grid; gap: 10px }
+.menu { border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 6px; cursor: pointer; background: var(--bg); text-align: left; color: var(--ink); font: inherit }
+.menu[aria-pressed="true"] { border: 2px solid var(--accent); background: var(--accent-soft) }
+.menu b { font: 400 17px var(--display) }
+.menu ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--muted) }
+
+/* workout view */
+details.wday { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; overflow: hidden }
+details.wday[open] { border-color: var(--accent) }
+details.wday > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center }
+details.wday > summary::-webkit-details-marker { display: none }
+details.wday > summary .nm { font: 400 18px var(--display) }
+details.wday > summary .tag { font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
+details.wday > summary .chev { grid-row: span 2; color: var(--muted); transition: transform .15s }
+details.wday[open] > summary .chev { transform: rotate(180deg) }
+details.wday .wo { border: 0; border-top: 1px solid var(--line); border-radius: 0 }
+.today-tag { color: var(--accent-ink) !important }
+
+/* shopping */
+.shop { padding: 12px 14px; columns: 2 300px; column-gap: 28px }
+.shop .aisle { break-inside: avoid; padding: 0 0 12px }
+.shop .aisle + .aisle { border-top: 1px solid var(--line); padding-top: 12px }
+.shop h3 { margin: 0 0 4px }
+.shop ul { list-style: none; margin: 0; padding: 0 }
+.shop label { display: flex; gap: 10px; align-items: flex-start; padding: 4px 0; cursor: pointer; font-size: 14.5px; line-height: 1.4 }
+.shop input { margin-top: 1px; accent-color: var(--accent); width: 18px; height: 18px; flex: none }
+.shop input:checked + span { color: var(--muted); text-decoration: line-through }
+
+
+/* leftovers and the larder, under the shopping list */
+.leftlist { margin: 0; padding-left: 18px; font-size: 14px } .leftlist li { margin: 2px 0 }
+.larderrows { list-style: none; margin: 0; padding: 0 }
+.larderrows li { display: grid; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--line) }
+.larderrows li > div:first-child { display: grid; gap: 2px } .larderrows .foot { margin: 0 }
+.larderrows .row { justify-content: flex-start } .larderrows .btn { padding: 6px 12px; font-size: 13px }
+.keeps { font: 500 12px var(--mono); color: var(--good) } .keeps.warn { color: var(--star) } .keeps.bad { color: var(--bad) }
+
+/* Train: workout edits, ladders, stats */
+.woedit { display: flex; gap: 10px; align-items: flex-end; margin-top: 12px; flex-wrap: wrap }
+.woedit select, .field select { font: 15px var(--body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px }
+.wsets { margin-top: 10px } .wsets textarea { width: 100%; font: 13.5px var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px }
+.ladder > summary { list-style: none; cursor: pointer; display: grid; gap: 2px } .ladder > summary::-webkit-details-marker { display: none }
+.ladder > summary b { font: 400 18px var(--display) } .ladder { margin-top: 12px }
+.ladsteps { list-style: none; margin: 10px 0 0; padding: 0 }
+.ladsteps li { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line) }
+.stepbtn { background: none; border: 0; color: var(--ink); font: 15px var(--body); display: flex; gap: 10px; align-items: center; text-align: left; padding: 0; cursor: pointer }
+.stepbtn .dot { width: 26px; height: 26px; flex: none; border-radius: 999px; border: 1px solid var(--line); display: grid; place-items: center; font: 500 12px var(--mono); color: var(--muted) }
+.ladsteps li.done .dot { background: var(--good-soft); color: var(--good); border-color: var(--good) } .ladsteps li.done .stepbtn { color: var(--muted) }
+.ladsteps li.cur .dot { background: var(--accent); color: var(--on-accent); border-color: var(--accent) } .ladsteps li.cur .stepbtn { font-weight: 600 }
+.tipbtn { padding: 4px 10px; font-size: 12.5px } .tip { grid-column: 1 / -1; margin: 2px 0 4px 36px; font-size: 13.5px; color: var(--muted) }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 10px }
+.unit { display: flex; align-items: center; gap: 6px } .unit i { font-style: normal; font: 500 12px var(--mono); color: var(--muted) }
+.field input, .field textarea { min-width: 0 }
+
+/* events and the surplus feed */
+.evmenu { display: grid; gap: 12px } .evdish { display: grid; gap: 2px; padding-bottom: 10px; border-bottom: 1px solid var(--line) }
+.evdish .nmb { background: none; border: 0; padding: 0; text-align: left; color: var(--ink); font: 400 18px/1.3 var(--display); cursor: pointer }
+.countdown { list-style: none; margin: 0; padding: 0 } .countdown li { display: grid; grid-template-columns: 118px 1fr; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px }
+.countdown .mono { font: 500 12px var(--mono); color: var(--accent-ink) } .countdown li.past { opacity: .5 }
+.chk { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; color: var(--ink); margin-right: 10px }
+.search.area { border-radius: 12px; resize: vertical; font: 15px var(--body) }
+.ljob { display: grid; gap: 2px; padding: 11px 0; border-bottom: 1px solid var(--line) } .ljob .nm { font: 400 17px/1.25 var(--display) }
+
+/* settings */
+dialog { border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); padding: 18px; width: min(92vw, 440px) }
+dialog::backdrop { background: rgba(0, 0, 0, .45) }
+.field { display: grid; gap: 4px; margin: 0 0 12px; font-size: 13.5px; color: var(--muted) }
+.toast { position: fixed; left: 50%; bottom: calc(var(--bar) + 14px + max(8px, env(safe-area-inset-bottom, 0px))); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 14px; z-index: 60; max-width: calc(100% - 32px) }

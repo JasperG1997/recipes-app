@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HelloClaude</title>
+<meta name="application-name" content="HelloClaude">
+<meta name="apple-mobile-web-app-title" content="HelloClaude">
+<meta name="description" content="This week's training, recipes and shopping list.">
+<meta name="theme-color" content="#141414">
+<link rel="manifest" href="manifest.webmanifest?v=fullscreen">
+<link rel="icon" href="icon-192.png?v=orange">
+<link rel="apple-touch-icon" href="icon-192.png?v=orange">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main>
+
+  <section id="view-train" class="view" hidden>
+    <div class="wrap">
+      <header class="head"><div><div class="eyebrow" id="woEyebrow">Training</div><h1>Train</h1></div>
+        <button class="icon-btn" type="button" data-settings aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+      </header>
+      <nav class="chipnav subtabs" data-subtabs="train" aria-label="Train sections">
+        <button type="button" data-sub="workout">Workout</button><button type="button" data-sub="progress">Progressions</button><button type="button" data-sub="stats">Stats and goals</button><button type="button" data-sub="engine">Engine</button><button type="button" data-sub="setup">Setup</button>
+      </nav>
+      <div class="subpane" data-pane="train:workout"><div class="syncbar"><span class="sync" data-sync></span><button class="btn" type="button" data-syncnow>Sync</button></div><div class="stack" id="workout" style="padding-top:6px;padding-bottom:24px"></div></div>
+      <div class="subpane" data-pane="train:progress" hidden><div id="progress" class="stack" style="padding:6px 0 24px"></div></div>
+      <div class="subpane" data-pane="train:stats" hidden><div id="stats" class="stack" style="padding:6px 0 24px"></div></div>
+      <div class="subpane" data-pane="train:engine" hidden><div id="engine" style="padding:6px 0 24px"></div></div>
+      <div class="subpane" data-pane="train:setup" hidden>
+        <nav class="chipnav wrapchips minor" id="setupPages" aria-label="Setup pages"></nav>
+        <div id="setupBody" class="doc" style="padding-bottom:24px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-discover" class="view" hidden>
+    <div class="wrap">
+      <header class="head"><div><div class="eyebrow" id="discEyebrow">From the Scouts</div><h1>Discover</h1></div></header>
+      <div id="discover" style="padding:6px 0 24px"></div>
+    </div>
+  </section>
+
+  <section id="view-recipes" class="view">
+    <nav class="days" id="dayPills" aria-label="Days"></nav>
+    <div class="rbslot" id="rbSlot"></div>
+    <div class="pager" id="recipes"><p class="lede" style="padding:24px 16px">Loading the week…</p></div>
+  </section>
+
+  <section id="view-shop" class="view" hidden>
+    <div class="wrap">
+      <header class="head"><div><div class="eyebrow" id="shopEyebrow">Shopping</div><h1>Shopping list</h1></div>
+        <button class="btn primary" type="button" id="copyAll" style="margin-top:6px">Copy list</button></header>
+      <div id="shop" style="padding-top:10px;padding-bottom:24px"></div>
+    </div>
+  </section>
+
+  <section id="view-repertoire" class="view" hidden>
+    <div class="wrap">
+      <header class="head"><div><div class="eyebrow" id="libCount">Recipe library</div><h1>Repertoire</h1></div></header>
+      <nav class="chipnav subtabs" data-subtabs="repertoire" aria-label="Repertoire sections">
+        <button type="button" data-sub="choices">Choices</button><button type="button" data-sub="events">Events</button><button type="button" data-sub="library">Meal library</button><button type="button" data-sub="larder">Larder library</button>
+      </nav>
+      <div class="subpane" data-pane="repertoire:library">
+      <input type="search" id="libSearch" class="search" placeholder="Search: lamb, 30 min, miso" aria-label="Search recipes" autocomplete="off">
+      <nav class="chipnav" id="libCourses" aria-label="Courses"></nav>
+      <nav class="chipnav minor" id="libDiets" aria-label="Diets" style="padding-top:0"></nav>
+      <ul class="librows" id="libRows"><li class="lede" style="padding:16px 0">Loading the library…</li></ul>
+      </div>
+      <div class="subpane" data-pane="repertoire:choices" hidden style="padding-bottom:24px">
+      <h2 style="margin-top:6px">What needs using up?</h2>
+      <p class="lede" style="font-size:14px">Leftovers, larder items, the end of a pack: type them, or add photos for Claude Code.</p>
+      <textarea id="surplus" class="search area" rows="2" placeholder="Half a bunch of parsley, 2 onions, chicken thighs" aria-label="What needs using up"></textarea>
+      <div class="row" style="margin-top:8px;justify-content:flex-start"><button class="btn primary" type="button" id="useUp">Find recipes</button>
+        <button class="btn" type="button" id="fillLeft">This week's leftovers</button></div>
+      <div class="row" style="margin-top:8px;justify-content:flex-start"><label class="btn" style="cursor:pointer">Add photos<input type="file" id="surplusPhotos" accept="image/*" multiple hidden></label>
+        <button class="btn" type="button" id="saveSurplus">Save for Claude Code</button></div>
+      <ul class="librows" id="surplusRows" style="margin-top:10px"></ul>
+      <h2 style="margin-top:18px">What are you in the mood for?</h2>
+      <p class="lede" style="font-size:14px">Tap a few, or say it in your own words.</p>
+      <div class="chipnav wrapchips" id="moods" role="group" aria-label="Moods"></div>
+      <input type="search" id="moodSearch" class="search" style="margin-top:2px" placeholder="Smoky, noodles, something with lemon" aria-label="Describe what you fancy" autocomplete="off">
+      <button class="btn primary big" type="button" id="findTen" style="margin-top:12px">Show me 10</button>
+      <ul class="librows" id="choiceRows" style="margin-top:14px"></ul>
+      <button class="btn" type="button" id="nextTen" hidden>Show 10 more</button>
+      </div>
+      <div class="subpane" data-pane="repertoire:larder" hidden><div id="larderLib" style="padding:6px 0 24px"></div></div>
+      <div class="subpane" data-pane="repertoire:events" hidden><div id="events" style="padding:6px 0 24px"></div></div>
+    </div>
+  </section>
+
+  <!-- screens opened from a tab; the phone's back button closes them -->
+  <section id="view-picks" class="view" hidden><div class="wrap" id="picksBody"></div></section>
+  <section id="view-detail" class="view" hidden><div class="wrap" id="detailBody"></div></section>
+  <section id="view-event" class="view" hidden><div class="wrap" id="eventBody"></div></section>
+</main>
+
+<nav class="tabbar" role="tablist" aria-label="Sections">
+  <button type="button" role="tab" data-view="train" aria-selected="false"><span class="pip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg></span>Train</button>
+  <button type="button" role="tab" data-view="discover" aria-selected="false"><span class="pip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="11" height="15" rx="2" transform="rotate(-8 10.5 11.5)"/><rect x="9" y="5" width="11" height="15" rx="2"/></svg></span>Discover</button>
+  <button type="button" role="tab" data-view="recipes" aria-selected="true"><span class="pip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7a3 3 0 0 1-3 3M17 21V3c-2.5 1-4 4-4 8h4"/></svg></span>Weekly pick</button>
+  <button type="button" role="tab" data-view="shop" aria-selected="false"><span class="pip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3.5h2.6l2.4 12h11.6l2-8.5H6.2"/></svg></span>Shopping</button>
+  <span class="unite" aria-hidden="true"></span>
+  <button type="button" role="tab" data-view="repertoire" aria-selected="false"><span class="pip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2h13"/><path d="M9 7h6"/></svg></span>Repertoire</button>
+</nav>
+
+<dialog id="settings">
+  <form method="dialog" id="settingsForm">
+    <h2 style="font-size:24px;margin-bottom:6px">Settings</h2>
+    <p class="lede" style="margin-bottom:14px;font-size:14px">The app reads your plan from your private GitHub repo and saves your menu picks there. Paste a fine-grained token with read and write access to that repo's contents. It stays on this phone.</p>
+    <label class="field">GitHub owner<input name="owner" autocomplete="off" spellcheck="false"></label>
+    <label class="field">Repository<input name="repo" autocomplete="off" spellcheck="false"></label>
+    <label class="field">Token<input name="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>    <p class="sync" id="settingsStatus"></p>
+    <div class="row"><button class="btn" value="cancel" type="submit">Cancel</button><button class="btn primary" value="save" type="submit">Save</button></div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
